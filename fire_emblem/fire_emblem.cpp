@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <stdlib.h>
+#include <time.h>
 using namespace std;
 
 class Unit
@@ -88,14 +90,85 @@ public:
 			}
 		}
 
-		if(enemyUnit.hp < 0)
+		if(enemyUnit.hp <= 0)
 		{
 			enemyUnit.hp = 0;
+			gainExp(enemyUnit);
 		}
-		if(hp < 0)
+		if(hp <= 0)
 		{
 			hp = 0;
 		}
+
+		if(exp >=100)
+		{
+			levelUp();
+			exp = 0;
+		}
+	}
+
+	void gainExp(Unit& enemyUnit)
+	{
+		exp += (enemyUnit.lvl*3 + 20);
+	}
+
+	void levelUp()
+	{
+		int statUp;
+		srand(time(NULL));
+
+		lvl += 1;
+
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			hp += 1;
+			cout << "Hp, ";
+		}
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			atk += 1;
+			cout << "Atk, ";
+		}
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			skl += 1;
+			cout << "Skl, ";
+		}
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			spd += 1;
+			cout << "Spd, ";
+		}
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			lck += 1;
+			cout << "Lck, ";
+		}
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			def += 1;
+			cout << "Def, ";
+		}
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			res += 1;
+			cout << "Res, ";
+		}
+		statUp = rand() % 2;
+		if(statUp == 1)
+		{
+			con += 1;
+			cout << "Con, ";
+		}
+
+		cout << "up!" << endl;
 	}
 
 //private:
@@ -109,6 +182,8 @@ public:
 	int res; //Resistance
 	int con; //Constitution
 	int mov; //Movement
+	int exp = 99; //Experience
+	int lvl = 1; //Level
 };
 
 void genUnits(vector<Unit>& unitList);
@@ -123,6 +198,7 @@ int main()
 	genUnits(unitList);
 	//displayUnit(unitList, "all");
 	//command(unitList);
+	battle(unitList, "LordEliwood", "Soldier");
 	battle(unitList, "LordEliwood", "Soldier");
 
 	return 0;

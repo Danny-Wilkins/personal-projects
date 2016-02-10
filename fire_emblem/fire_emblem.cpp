@@ -1,17 +1,20 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 using namespace std;
 
 class Unit
 {
 public:
-	Unit(const string& unitName, const int& unitHp, const int& unitSm, const int& unitSkl,
+	Unit(const string& unitName, const int& unitHp, const int& unitAtk, const int& unitSkl,
 		const int& unitSpd, const int& unitLck, const int& unitDef, const int& unitRes,
-		const int& unitCon, const int& unitMov) : name(unitName), hp(unitHp), sm(unitSm),
+		const int& unitCon, const int& unitMov) : name(unitName), hp(unitHp), atk(unitAtk),
 		skl(unitSkl), spd(unitSpd), lck(unitLck), def(unitDef), res(unitRes), con(unitCon),
 		mov(unitMov)
+	{
+
+	}
+	Unit()
 	{
 
 	}
@@ -20,7 +23,7 @@ public:
 	{
 		cout << "Name: " << name << endl;
 		cout << "HP: " << hp << endl;
-		cout << "Strength/Magic: " << sm << endl;
+		cout << "Atk: " << atk << endl;
 		cout << "Skill: " << skl << endl;
 		cout << "Speed: " << spd << endl;
 		cout << "Luck: " << lck << endl;
@@ -38,10 +41,67 @@ public:
 		newUnit.statDisplay();
 	}*/
 
+	void fight(Unit& enemyUnit)
+	{
+			if(enemyUnit.def < atk)
+			{
+				enemyUnit.hp = (enemyUnit.hp + enemyUnit.def) - atk;
+			}
+			else //No damage
+			{
+				enemyUnit.hp = enemyUnit.hp - 0;
+			}
+		
+
+		if(enemyUnit.hp > 0)
+		{
+			if(def < enemyUnit.atk)
+			{
+				hp = (hp + def) - enemyUnit.atk;
+			}
+			else //No damage
+			{
+				hp = hp - 0;
+			}
+
+			if(spd >= (enemyUnit.spd + 4))
+			{
+				if(enemyUnit.def <= atk)
+				{
+					enemyUnit.hp = (enemyUnit.hp + enemyUnit.def) - atk;
+				}
+				else //No damage
+				{
+					enemyUnit.hp = enemyUnit.hp - 0;
+				}
+			}	
+			else if(enemyUnit.spd > (spd + 4) && hp > 0)
+			{
+				if(def < enemyUnit.atk)
+				{
+					hp = (hp + def) - enemyUnit.atk;
+				}
+				else //No damage
+				{
+					hp = hp - 0;
+				}
+			}
+		}
+
+		if(enemyUnit.hp < 0)
+		{
+			enemyUnit.hp = 0;
+		}
+		if(hp < 0)
+		{
+			hp = 0;
+		}
+	}
+
 //private:
 	string name; //Name
 	int hp;	//HP
-	int sm;	//Strength/Magic
+	int atk; //Strength/Magic
 	int skl; //Skill
 	int spd; //Speed
 	int lck; //Luck
@@ -53,15 +113,17 @@ public:
 
 void genUnits(vector<Unit>& unitList);
 void genStats(const string& name, const vector<int>& stats, vector<Unit>& unitList);
-void displayUnit(const vector<Unit>& unitList, const string& displayName);
+void displayUnit(const vector<Unit>& unitList, const string& unitName);
 void command(const vector<Unit>& unitList);
+void battle(vector<Unit>& unitList, const string& unitName1, const string& unitName2);
 
 int main()
 {
 	vector<Unit> unitList;
 	genUnits(unitList);
-	displayUnit(unitList, "all");
+	//displayUnit(unitList, "all");
 	//command(unitList);
+	battle(unitList, "LordEliwood", "Soldier");
 
 	return 0;
 }
@@ -69,7 +131,7 @@ int main()
 void genUnits(vector<Unit>& unitList) //Generates units from a file
 {
 	string word;
-	string unitClass;
+	string unitName;
 	int unitStat;
 	vector<int> stats;
 
@@ -87,12 +149,12 @@ void genUnits(vector<Unit>& unitList) //Generates units from a file
 		{
 			if(stats.size() == 9)
 			{
-				genStats(unitClass, stats, unitList);
+				genStats(unitName, stats, unitList);
 				stats.clear();
-				unitClass = "";
+				unitName = "";
 			}
 
-			unitClass = word;
+			unitName = word;
 		}
 		else
 		{
@@ -103,9 +165,9 @@ void genUnits(vector<Unit>& unitList) //Generates units from a file
 
 	if(ifs.eof())
 	{
-		genStats(unitClass, stats, unitList);
+		genStats(unitName, stats, unitList);
 		stats.clear();
-		unitClass = "";
+		unitName = "";
 	}
 
 	ifs.close();
@@ -120,11 +182,11 @@ void genStats(const string& name, const vector<int>& stats, vector<Unit>& unitLi
 	unitList.push_back(newUnit);
 }
 
-void displayUnit(const vector<Unit>& unitList, const string& displayName)
+void displayUnit(const vector<Unit>& unitList, const string& unitName)
 {
 	cout << endl;
 
-	if(displayName == "all")
+	if(unitName == "all")
 	{
 		for(Unit someUnit : unitList)
 		{
@@ -135,7 +197,7 @@ void displayUnit(const vector<Unit>& unitList, const string& displayName)
 	{
 		for(Unit someUnit : unitList)
 		{
-			if(displayName == someUnit.name)
+			if(unitName == someUnit.name)
 			{
 				someUnit.statDisplay();
 				break;
@@ -153,14 +215,64 @@ void command(const vector<Unit>& unitList)
 
 	if(inputCommand == "displayUnit")
 	{
-		string displayName;
+		string unitName;
 		cout << "Which unit would you like to display: ";
-		cin >> displayName;
-		displayUnit(unitList, displayName);
+		cin >> unitName;
+		displayUnit(unitList, unitName);
 	}
 
 	if(inputCommand != "quit")
 	{
 		command(unitList);
 	}
+}
+
+void battle(vector<Unit>& unitList, const string& unitName1, const string& unitName2)
+{
+	Unit unit1;
+	Unit unit2;
+
+	for(Unit someUnit : unitList)
+	{
+		if(unitName1 == someUnit.name)
+		{
+			unit1 = someUnit;
+		}
+		if(unitName2 == someUnit.name)
+		{
+			unit2 = someUnit;
+		}
+	}
+
+	displayUnit(unitList, unit1.name);
+	displayUnit(unitList, unit2.name);
+
+	unit1.fight(unit2);
+
+	/*for(Unit someUnit : unitList) //Strangely not working
+	{
+		if(unit1.name == someUnit.name)
+		{
+			someUnit = unit1;
+		}
+		if(unit2.name == someUnit.name)
+		{
+			someUnit = unit2;
+		}
+	}*/
+
+	for(int i = 0; i < unitList.size(); i++)
+	{
+		if(unitList[i].name == unit1.name)
+		{
+			unitList[i] = unit1;
+		}
+		if(unitList[i].name == unit2.name)
+		{
+			unitList[i] = unit2;
+		}
+	}
+
+	displayUnit(unitList, unit1.name);
+	displayUnit(unitList, unit2.name);
 }

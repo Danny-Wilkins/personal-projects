@@ -14,15 +14,14 @@ Display units
 Commands
 Units fighting each other
 Unit levelling
+Basic map functionality (create, display, move units on map)
 
 Future functionality:
 Unit death
 Hit chance and other RNG based things
 Other basic things
 User interaction
-
-Very future functionality:
-Create a "board" for units to roam and whatnot
+Phases and user input (like actually playing the game)
 
 One day:
 Add terrain and all that other stuff the game has

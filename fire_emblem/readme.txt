@@ -7,3 +7,21 @@ Contains a parser for the html file saved from this webpage: http://serenesfores
 Parser should work with other html files from Serene's Forest such as this one: http://serenesforest.net/the-sacred-stones/classes/base-stats/
 
 Also contains the actual game which isn't quite a game yet. It's getting there.
+
+Current functionality of game:
+Generate units from text file
+Display units
+Commands
+
+Future functionality:
+Units fighting each other
+Unit death
+Unit levelling
+Hit chance and other RNG based things
+Other basic things
+
+Very future functionality:
+Create a "board" for units to roam and whatnot
+
+One day:
+Add terrain and all that other stuff the game has

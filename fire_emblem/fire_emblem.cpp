@@ -12,14 +12,8 @@ public:
 		const int& unitSpd, const int& unitLck, const int& unitDef, const int& unitRes,
 		const int& unitCon, const int& unitMov) : name(unitName), hp(unitHp), atk(unitAtk),
 		skl(unitSkl), spd(unitSpd), lck(unitLck), def(unitDef), res(unitRes), con(unitCon),
-		mov(unitMov)
-	{
-
-	}
-	Unit()
-	{
-
-	}
+		mov(unitMov){}
+	Unit(){}
 
 	void statDisplay() const
 	{
@@ -35,35 +29,18 @@ public:
 		cout << "Movement: " << mov << endl << endl;
 	}
 
-	/*void genStats(string& name, vector<int>& stats)
-	{
-		Unit newUnit(name, stats[0], stats[1], stats[2], stats[3], stats[4], stats[5], stats[6],
-			stats[7], stats[8]);
-
-		newUnit.statDisplay();
-	}*/
-
 	void fight(Unit& enemyUnit)
 	{
-			if(enemyUnit.def < atk)
-			{
-				enemyUnit.hp = (enemyUnit.hp + enemyUnit.def) - atk;
-			}
-			else //No damage
-			{
-				enemyUnit.hp = enemyUnit.hp - 0;
-			}
-		
+		if(enemyUnit.def < atk)
+		{
+			enemyUnit.hp = (enemyUnit.hp + enemyUnit.def) - atk;
+		}
 
 		if(enemyUnit.hp > 0)
 		{
 			if(def < enemyUnit.atk)
 			{
 				hp = (hp + def) - enemyUnit.atk;
-			}
-			else //No damage
-			{
-				hp = hp - 0;
 			}
 
 			if(spd >= (enemyUnit.spd + 4))
@@ -72,20 +49,12 @@ public:
 				{
 					enemyUnit.hp = (enemyUnit.hp + enemyUnit.def) - atk;
 				}
-				else //No damage
-				{
-					enemyUnit.hp = enemyUnit.hp - 0;
-				}
 			}	
 			else if(enemyUnit.spd > (spd + 4) && hp > 0)
 			{
 				if(def < enemyUnit.atk)
 				{
 					hp = (hp + def) - enemyUnit.atk;
-				}
-				else //No damage
-				{
-					hp = hp - 0;
 				}
 			}
 		}
@@ -100,14 +69,97 @@ public:
 			hp = 0;
 		}
 
-		if(exp >=100)
+		if(exp >= 100)
 		{
 			levelUp();
-			exp = 0;
+			exp = exp % 100;
 		}
 	}
 
-	void gainExp(Unit& enemyUnit)
+	void move(vector<vector<string>>& map, const string& movement)
+	{
+		bool right;
+		bool left;
+		bool up;
+		bool down;
+
+		if(movement == "right")
+		{
+			right = true;
+			left = false;
+			up = false;
+			down = false;
+		}
+		else if(movement == "left")
+		{
+			right = false;
+			left = true;
+			up = false;
+			down = false;
+		}
+		else if(movement == "up")
+		{
+			right = false;
+			left = false;
+			up = true;
+			down = false;
+		}
+		else if(movement == "down")
+		{
+			right = false;
+			left = false;
+			up = false;
+			down = true;
+		}
+
+		if(right == true && left == false && up == false && down == false)
+		{
+			if(x < map[y].size()-1)
+			{
+				x++;
+			}
+		}
+		else if(right == false && left == true && up == false && down == false)
+		{
+			if(x < map[y].size()-1)
+			{
+				x--;
+			}
+		}
+		else if(right == false && left == false && up == true && down == false)
+		{
+			if(y > 0)
+			{
+				y--;
+			}
+		}
+		else if(right == false && left == false && up == false && down == true)
+		{
+			if(y < map.size()-1)
+			{
+				y++;
+			}
+		}
+	}
+
+	string name; //Name
+	int hp;	//HP
+	int atk; //Strength/Magic
+	int skl; //Skill
+	int spd; //Speed
+	int lck; //Luck
+	int def; //Defense
+	int res; //Resistance
+	int con; //Constitution
+	int mov; //Movement
+	int x; //X Coordinate
+	int y; //Y Coordinate
+
+private:
+	int exp = 99; //Experience
+	int lvl = 1; //Level
+
+	void gainExp(const Unit& enemyUnit)
 	{
 		exp += (enemyUnit.lvl*3 + 20);
 	}
@@ -170,41 +222,41 @@ public:
 
 		cout << "up!" << endl;
 	}
-
-//private:
-	string name; //Name
-	int hp;	//HP
-	int atk; //Strength/Magic
-	int skl; //Skill
-	int spd; //Speed
-	int lck; //Luck
-	int def; //Defense
-	int res; //Resistance
-	int con; //Constitution
-	int mov; //Movement
-	int exp = 99; //Experience
-	int lvl = 1; //Level
 };
 
-void genUnits(vector<Unit>& unitList);
-void genStats(const string& name, const vector<int>& stats, vector<Unit>& unitList);
+void createUnitStats(vector<Unit>& unitList);
+void createUnits(const string& name, const vector<int>& stats, vector<Unit>& unitList);
 void displayUnit(const vector<Unit>& unitList, const string& unitName);
 void command(const vector<Unit>& unitList);
 void battle(vector<Unit>& unitList, const string& unitName1, const string& unitName2);
+void checkPosition(vector<vector<string>>& map, const Unit& someUnit);
+int selectUnit(const vector<Unit>& unitList, const string& unitName);
 
 int main()
 {
+	//Immediately creates units and generates map
 	vector<Unit> unitList;
-	genUnits(unitList);
-	//displayUnit(unitList, "all");
+	createUnitStats(unitList);
+	vector< vector<string> > map(16, vector<string>(16));
+
+	//displayUnit(unitList, "all"); //Format for displayUnit()
+
 	//command(unitList);
-	battle(unitList, "LordEliwood", "Soldier");
-	battle(unitList, "LordEliwood", "Soldier");
+
+	//int unitIndex = selectUnit(unitList, "LordEliwood"); //Format for selectUnit()
+
+	//battle(unitList, "LordEliwood", "Soldier"); //Format for battle()
+	//battle(unitList, "LordEliwood", "Soldier");
+
+	//unitList[unitIndex].x = 4; //Set coordinates of a unit
+	//unitList[unitIndex].y = 10;
+
+	//checkPosition(map, unitList[unitIndex]); //Checks position of one unit on map
 
 	return 0;
 }
 
-void genUnits(vector<Unit>& unitList) //Generates units from a file
+void createUnitStats(vector<Unit>& unitList) //Generates unit stats from a file
 {
 	string word;
 	string unitName;
@@ -219,13 +271,13 @@ void genUnits(vector<Unit>& unitList) //Generates units from a file
 		exit(1);
 	}
 
-	while(ifs >> word)
+	while(ifs >> word) //Builds stat list
 	{
-		if(word[0] >= 'A' && word[0] <= 'Z')
+		if(word[0] >= 'A' && word[0] <= 'Z') 
 		{
 			if(stats.size() == 9)
 			{
-				genStats(unitName, stats, unitList);
+				createUnits(unitName, stats, unitList);
 				stats.clear();
 				unitName = "";
 			}
@@ -239,9 +291,9 @@ void genUnits(vector<Unit>& unitList) //Generates units from a file
 		}
 	}
 
-	if(ifs.eof())
+	if(ifs.eof()) //Makes last unit in file
 	{
-		genStats(unitName, stats, unitList);
+		createUnits(unitName, stats, unitList);
 		stats.clear();
 		unitName = "";
 	}
@@ -249,20 +301,20 @@ void genUnits(vector<Unit>& unitList) //Generates units from a file
 	ifs.close();
 }
 
-void genStats(const string& name, const vector<int>& stats, vector<Unit>& unitList)
+void createUnits(const string& name, const vector<int>& stats, vector<Unit>& unitList)
 {
 	Unit newUnit(name, stats[0], stats[1], stats[2], stats[3], stats[4], stats[5], stats[6],
 		stats[7], stats[8]);
 
 	//newUnit.statDisplay();
-	unitList.push_back(newUnit);
+	unitList.push_back(newUnit); //Puts unit into vector
 }
 
-void displayUnit(const vector<Unit>& unitList, const string& unitName)
+void displayUnit(const vector<Unit>& unitList, const string& unitName) //Shows unit stats
 {
 	cout << endl;
 
-	if(unitName == "all")
+	if(unitName == "all") //For all
 	{
 		for(Unit someUnit : unitList)
 		{
@@ -271,7 +323,7 @@ void displayUnit(const vector<Unit>& unitList, const string& unitName)
 	}
 	else
 	{
-		for(Unit someUnit : unitList)
+		for(Unit someUnit : unitList) //For a specified unit
 		{
 			if(unitName == someUnit.name)
 			{
@@ -282,7 +334,18 @@ void displayUnit(const vector<Unit>& unitList, const string& unitName)
 	}
 }
 
-void command(const vector<Unit>& unitList)
+int selectUnit(const vector<Unit>& unitList, const string& unitName) //Gets index of unit
+{
+		for(int i = 0; i < unitList.size(); i++)
+		{
+			if(unitName == unitList[i].name)
+			{
+				return i;
+			}
+		}
+}
+
+void command(const vector<Unit>& unitList) //Executes commands
 {
 	string inputCommand;
 	cout << "Enter a command: ";
@@ -320,12 +383,12 @@ void battle(vector<Unit>& unitList, const string& unitName1, const string& unitN
 		}
 	}
 
-	displayUnit(unitList, unit1.name);
+	displayUnit(unitList, unit1.name); //Before battle
 	displayUnit(unitList, unit2.name);
 
 	unit1.fight(unit2);
 
-	/*for(Unit someUnit : unitList) //Strangely not working
+	for(Unit& someUnit : unitList)
 	{
 		if(unit1.name == someUnit.name)
 		{
@@ -335,20 +398,37 @@ void battle(vector<Unit>& unitList, const string& unitName1, const string& unitN
 		{
 			someUnit = unit2;
 		}
-	}*/
-
-	for(int i = 0; i < unitList.size(); i++)
-	{
-		if(unitList[i].name == unit1.name)
-		{
-			unitList[i] = unit1;
-		}
-		if(unitList[i].name == unit2.name)
-		{
-			unitList[i] = unit2;
-		}
 	}
 
-	displayUnit(unitList, unit1.name);
+	displayUnit(unitList, unit1.name); //After battle
 	displayUnit(unitList, unit2.name);
+}
+
+void checkPosition(vector<vector<string>>& map, const Unit& someUnit) //Shows map and unit pos
+{
+	cout << endl;
+
+	for(int i = 0; i < map.size(); i++)
+	{
+		for(int k = 0; k < map[i].size(); k++)
+		{
+			if(someUnit.y == i && someUnit.x == k)
+			{
+				map[i][k] = "[X]";
+			}
+			else
+			{
+				map[i][k] = "[ ]";
+			}
+
+			if(k < map[i].size()-1)
+			{
+				cout << map[i][k];
+			}
+			else
+			{
+				cout << map[i][k] << endl;
+			}
+		}
+	}
 }

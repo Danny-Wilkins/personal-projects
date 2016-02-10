@@ -12,13 +12,14 @@ Current functionality of game:
 Generate units from text file
 Display units
 Commands
+Units fighting each other
+Unit levelling
 
 Future functionality:
-Units fighting each other
 Unit death
-Unit levelling
 Hit chance and other RNG based things
 Other basic things
+User interaction
 
 Very future functionality:
 Create a "board" for units to roam and whatnot

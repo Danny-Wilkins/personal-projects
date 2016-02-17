@@ -2,20 +2,26 @@
 #include <fstream>
 #include <vector>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 using namespace std;
 
+class unit;
+
 struct mapPlace
 {
-	string empty = "[ ]";
-	string full = "[X]";
+	string empty = "[  ]";
+	//string full = "[X]";
+	string full;
 	string current;
+	string name;
 	bool occupied = false;
 
 	void show()
 	{
 		if(occupied)
 		{
+			full = "[" + name + "]";
 			current = full;
 			cout << current;
 		}
@@ -149,15 +155,17 @@ public:
 				map[y][x].occupied = false;
 				x++;
 				map[y][x].occupied = true;
+				map[y][x].name = name.substr(0,2);
 			}
 		}
 		else if(right == false && left == true && up == false && down == false)
 		{
-			if(x < map[y].size()-1)
+			if(x > 0)
 			{
 				map[y][x].occupied = false;
 				x--;
 				map[y][x].occupied = true;
+				map[y][x].name = name.substr(0,2);
 			}
 		}
 		else if(right == false && left == false && up == true && down == false)
@@ -167,6 +175,7 @@ public:
 				map[y][x].occupied = false;
 				y--;
 				map[y][x].occupied = true;
+				map[y][x].name = name.substr(0,2);
 			}
 		}
 		else if(right == false && left == false && up == false && down == true)
@@ -176,6 +185,7 @@ public:
 				map[y][x].occupied = false;
 				y++;
 				map[y][x].occupied = true;
+				map[y][x].name = name.substr(0,2);
 			}
 		}
 		else if(right == false && left == false && up == false && down == false)
@@ -183,6 +193,7 @@ public:
 			if(x < map[y].size()-1)
 			{
 				map[y][x].occupied = true;
+				map[y][x].name = name.substr(0,2);
 			}
 		}
 	}
@@ -274,37 +285,50 @@ void createUnits(const string& name, const vector<int>& stats, vector<Unit>& uni
 void displayUnit(const vector<Unit>& unitList, const string& unitName);
 void command(const vector<Unit>& unitList);
 void battle(vector<Unit>& unitList, const string& unitName1, const string& unitName2);
-void displayMap(vector<vector<mapPlace>>& map, vector<Unit> unitList);
-int selectUnit(const vector<Unit>& unitList, const string& unitName);
-void playerPhase(vector<vector<mapPlace>>& map, vector<Unit> unitList);
+void displayMap(vector<vector<mapPlace>>& map, vector<Unit>& unitList);
+int selectUnit(const vector<Unit>& unitList, string& unitName);
+void playerPhase(vector<vector<mapPlace>>& map, vector<Unit>& unitList,
+				 vector<string>& activeUnitList);
+void moveUnit(vector<vector<mapPlace>>& map, vector<Unit>& unitList, const int unitIndex);
+void gameSetup(vector<vector<mapPlace>>& map, vector<Unit>& unitList, 
+			   vector<string>& activeUnitList);
+void activeUnits(const vector<string>& activeUnitList);
 
 int main()
 {
 	//Immediately creates units and generates map
 	vector<Unit> unitList;
+	vector<string> activeUnitList;
 	createUnitStats(unitList);
-	vector<vector<mapPlace>> map(16, vector<mapPlace>(16));
+	vector<vector<mapPlace>> map(24, vector<mapPlace>(24));
 
 	//displayUnit(unitList, "all"); //Format for displayUnit()
 
 	//command(unitList);
 
-	int unitIndex = selectUnit(unitList, "LordEliwood"); //Format for selectUnit()
+	//int unitIndex = selectUnit(unitList, "LordEliwood"); //Format for selectUnit()
+	//int selected;
+	//string nameInput;
 
 	//battle(unitList, "LordEliwood", "Soldier"); //Format for battle()
 	//battle(unitList, "LordEliwood", "Soldier");
 
-	unitList[unitIndex].x = 4; //Set coordinates of a unit
-	unitList[unitIndex].y = 10;
+	//unitList[unitIndex].x = 0; //Set coordinates of a unit
+	//unitList[unitIndex].y = 0;
 
-	unitList[unitIndex].move(map, "none"); // Initialize unit on map
-	displayMap(map, unitList);
-	unitList[unitIndex].move(map, "right");
-	displayMap(map, unitList);
+	//moveUnit(map, unitList, unitIndex);
+
+	gameSetup(map, unitList, activeUnitList);
+	playerPhase(map, unitList, activeUnitList);
+
+	/*cout << "Select a unit: " << endl;
+	cin >> nameInput;
+
+	selected = selectUnit(unitList, nameInput);
+
+	moveUnit(map, unitList, selected);*/
 
 	//playerPhase(map, unitList);
-
-
 
 	return 0;
 }
@@ -387,15 +411,19 @@ void displayUnit(const vector<Unit>& unitList, const string& unitName) //Shows u
 	}
 }
 
-int selectUnit(const vector<Unit>& unitList, const string& unitName) //Gets index of unit
+int selectUnit(const vector<Unit>& unitList, string& unitName) //Gets index of unit
 {
-		for(int i = 0; i < unitList.size(); i++)
+	for(int i = 0; i < unitList.size(); i++)
+	{
+		if(unitName == unitList[i].name)
 		{
-			if(unitName == unitList[i].name)
-			{
-				return i;
-			}
+			return i;
 		}
+	}
+
+	cout << "Select another unit: " << endl;
+	cin >> unitName;
+	selectUnit(unitList, unitName);
 }
 
 void command(const vector<Unit>& unitList) //Executes commands
@@ -457,7 +485,7 @@ void battle(vector<Unit>& unitList, const string& unitName1, const string& unitN
 	displayUnit(unitList, unit2.name);
 }
 
-void displayMap(vector<vector<mapPlace>>& map, vector<Unit> unitList)
+void displayMap(vector<vector<mapPlace>>& map, vector<Unit>& unitList)
 {
 	cout << endl;
 
@@ -478,16 +506,139 @@ void displayMap(vector<vector<mapPlace>>& map, vector<Unit> unitList)
 	}
 }
 
-void playerPhase(vector<vector<mapPlace>>& map, vector<Unit> unitList)
+void playerPhase(vector<vector<mapPlace>>& map, vector<Unit>& unitList,
+				 vector<string>& activeUnitList)
 {
-	srand(time(NULL));
-	for(Unit& someUnit : unitList)
-	{
-		someUnit.x = rand() % 16;
-		someUnit.y = rand() % 16;
-		//displayMap(map, UnitList);
+	int movedUnits = 0;
+	vector<string> movedUnitsNames;
+	bool found = false;
+	int selected;
+	string nameInput;
 
-		//cout << "(" << someUnit.x << "," << someUnit.y << ")" << endl;
+	while(movedUnits < 5)
+	{
+		activeUnits(activeUnitList);
+		cout << "Select a unit: " << endl;
+		cin >> nameInput;
+
+		selected = selectUnit(unitList, nameInput);
+
+		for(int i = 0; i < movedUnitsNames.size(); i++)
+		{
+			if(unitList[selected].name == movedUnitsNames[i])
+			{
+				found = true;
+				cout << "You already moved that unit." << endl;
+			}
+		}
+
+		if(!found)
+		{
+			moveUnit(map, unitList, selected);
+			movedUnitsNames.push_back(unitList[selected].name);
+			movedUnits++;
+		}
+
+		found = false;
+	}
+}
+
+void moveUnit(vector<vector<mapPlace>>& map, vector<Unit>& unitList, const int unitIndex)
+{	
+	unitList[unitIndex].move(map, "none");
+	displayMap(map, unitList);
+	char input;
+	int moves = unitList[unitIndex].mov;
+	
+	for(int i = 0; i < moves; i++)
+	{
+		system("clear");
+		displayMap(map, unitList);
+		cout << "You have " << (moves - i) << " moves left." << endl; 
+
+		int x = unitList[unitIndex].x;
+		int y = unitList[unitIndex].y;
+
+		cin >> input;
+
+		switch(input) 
+		{
+			case 'w':
+				unitList[unitIndex].move(map, "up");
+				break;
+			case 's':
+				unitList[unitIndex].move(map, "down");
+				break;
+			case 'a':
+				unitList[unitIndex].move(map, "left");
+				break;
+			case 'd':
+				unitList[unitIndex].move(map, "right");
+				break;
+			default:
+				unitList[unitIndex].move(map, "none");
+				break;
+		}
+
+		if(unitList[unitIndex].x == x && unitList[unitIndex].y == y)
+		{
+			i--;
+			cout << "You cannot move there." << endl;
+		}
 	}
 
+	system("clear");
+	displayMap(map, unitList);
+}
+
+void gameSetup(vector<vector<mapPlace>>& map, vector<Unit>& unitList, 
+			   vector<string>& activeUnitList)
+{
+	srand(time(NULL)); //Units CAN be on the same tile but it's unlikely
+	usleep(2000000);   //So I might try to prevent that later
+
+	int unit1 = rand() % unitList.size();
+	int unit2 = rand() % unitList.size();
+	int unit3 = rand() % unitList.size();
+	int unit4 = rand() % unitList.size();
+	int unit5 = rand() % unitList.size();
+
+	unitList[unit1].x = rand() % (map[0].size() / 3);
+	unitList[unit1].y = rand() % (map[0].size() / 3);
+	unitList[unit2].x = rand() % (map[0].size() / 3);
+	unitList[unit2].y = rand() % (map[0].size() / 3);
+	unitList[unit3].x = rand() % (map[0].size() / 3);
+	unitList[unit3].y = rand() % (map[0].size() / 3);
+	unitList[unit4].x = rand() % (map[0].size() / 3);
+	unitList[unit4].y = rand() % (map[0].size() / 3);
+	unitList[unit5].x = rand() % (map[0].size() / 3);
+	unitList[unit5].y = rand() % (map[0].size() / 3);
+
+	unitList[unit1].move(map, "none");
+	unitList[unit2].move(map, "none");
+	unitList[unit3].move(map, "none");
+	unitList[unit4].move(map, "none");
+	unitList[unit5].move(map, "none");
+
+	system("clear");
+
+	activeUnitList.push_back(unitList[unit1].name);
+	activeUnitList.push_back(unitList[unit2].name);
+	activeUnitList.push_back(unitList[unit3].name);
+	activeUnitList.push_back(unitList[unit4].name);
+	activeUnitList.push_back(unitList[unit5].name);
+
+	displayMap(map, unitList);
+}
+
+void activeUnits(const vector<string>& activeUnitList)
+{
+	cout << endl << "Your active units: " << endl;
+
+	for(int i = 0; i < activeUnitList.size(); i++)
+	{
+		cout << activeUnitList[i] << endl;
+	}
+
+	cout << endl;
 }

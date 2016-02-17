@@ -7,6 +7,7 @@
 using namespace std;
 
 class unit;
+struct mapPlace;
 
 struct mapPlace
 {
@@ -16,6 +17,7 @@ struct mapPlace
 	string current;
 	string name;
 	bool occupied = false;
+	bool enemy = false;
 
 	void show()
 	{
@@ -23,7 +25,15 @@ struct mapPlace
 		{
 			full = "[" + name + "]";
 			current = full;
-			cout << current;
+
+			if(enemy == false)
+			{
+				cout << "\033[1;34m" << current << "\033[0m";
+			}
+			else
+			{
+				cout << "\033[1;31m" << current << "\033[0m";
+			}
 		}
 		else
 		{
@@ -152,6 +162,10 @@ public:
 		{
 			if(x < map[y].size()-1)
 			{
+				if(enemy == true)
+				{
+					map[y][x].enemy = true;
+				}
 				map[y][x].occupied = false;
 				x++;
 				map[y][x].occupied = true;
@@ -162,6 +176,10 @@ public:
 		{
 			if(x > 0)
 			{
+				if(enemy == true)
+				{
+					map[y][x].enemy = true;
+				}
 				map[y][x].occupied = false;
 				x--;
 				map[y][x].occupied = true;
@@ -172,6 +190,10 @@ public:
 		{
 			if(y > 0)
 			{
+				if(enemy == true)
+				{
+					map[y][x].enemy = true;
+				}
 				map[y][x].occupied = false;
 				y--;
 				map[y][x].occupied = true;
@@ -182,6 +204,10 @@ public:
 		{
 			if(y < map.size()-1)
 			{
+				if(enemy == true)
+				{
+					map[y][x].enemy = true;
+				}
 				map[y][x].occupied = false;
 				y++;
 				map[y][x].occupied = true;
@@ -190,6 +216,10 @@ public:
 		}
 		else if(right == false && left == false && up == false && down == false)
 		{
+				if(enemy == true)
+				{
+					map[y][x].enemy = true;
+				}
 			if(x < map[y].size()-1)
 			{
 				map[y][x].occupied = true;
@@ -210,6 +240,7 @@ public:
 	int mov; //Movement
 	int x; //X Coordinate
 	int y; //Y Coordinate
+	bool enemy = false;
 
 private:
 	int exp = 99; //Experience
@@ -532,7 +563,7 @@ void playerPhase(vector<vector<mapPlace>>& map, vector<Unit>& unitList,
 			}
 		}
 
-		if(!found)
+		if(!found && unitList[selected].enemy == false)
 		{
 			moveUnit(map, unitList, selected);
 			movedUnitsNames.push_back(unitList[selected].name);
@@ -564,16 +595,34 @@ void moveUnit(vector<vector<mapPlace>>& map, vector<Unit>& unitList, const int u
 		switch(input) 
 		{
 			case 'w':
-				unitList[unitIndex].move(map, "up");
+				if(y > 0)
+				{
+					if(map[y-1][x].occupied == false)
+					{
+						unitList[unitIndex].move(map, "up");
+					}
+				}
 				break;
 			case 's':
-				unitList[unitIndex].move(map, "down");
+				if(y < map.size()-1)
+				{
+					if(map[y+1][x].occupied == false)
+					{
+						unitList[unitIndex].move(map, "down");
+					}
+				}
 				break;
 			case 'a':
-				unitList[unitIndex].move(map, "left");
+				if(map[y][x-1].occupied == false)
+				{
+					unitList[unitIndex].move(map, "left");
+				}
 				break;
 			case 'd':
-				unitList[unitIndex].move(map, "right");
+				if(map[y][x+1].occupied == false)
+				{
+					unitList[unitIndex].move(map, "right");
+				}
 				break;
 			default:
 				unitList[unitIndex].move(map, "none");
@@ -603,6 +652,73 @@ void gameSetup(vector<vector<mapPlace>>& map, vector<Unit>& unitList,
 	int unit4 = rand() % unitList.size();
 	int unit5 = rand() % unitList.size();
 
+	int enemy1 = rand() % unitList.size();
+	int enemy2 = rand() % unitList.size();
+	int enemy3 = rand() % unitList.size();
+	int enemy4 = rand() % unitList.size();
+	int enemy5 = rand() % unitList.size();
+
+	while(unit1 == enemy1 || unit1 == enemy2 || unit1 == enemy3 || unit1 == enemy4
+		|| unit1 == enemy5 || unit1 == unit2 || unit1 == unit3 || unit1 == unit4 
+		|| unit1 == unit5)
+	{
+		unit1 = rand() % unitList.size();
+	}
+	while(unit2 == enemy1 || unit2 == enemy2 || unit2 == enemy3 || unit2 == enemy4
+		|| unit2 == enemy5 || unit2 == unit1 || unit2 == unit3 || unit2 == unit4 
+		|| unit2 == unit5)
+	{
+		unit2 = rand() % unitList.size();
+	}
+	while(unit3 == enemy1 || unit3 == enemy2 || unit3 == enemy3 || unit3 == enemy4
+		|| unit3 == enemy5 || unit3 == unit1 || unit3 == unit2 ||unit3 == unit4 
+		|| unit3 == unit5)
+	{
+		unit3 = rand() % unitList.size();
+	}
+	while(unit4 == enemy1 || unit4 == enemy2 || unit4 == enemy3 || unit4 == enemy4
+		|| unit4 == enemy5 ||unit4 == unit1 || unit4 == unit2 || unit4 == unit3 
+		|| unit4 == unit5)
+	{
+		unit4 = rand() % unitList.size();
+	}
+	while(unit5 == enemy1 || unit5 == enemy2 || unit5 == enemy3 || unit5 == enemy4
+		|| unit5 == enemy5 || unit5 == unit1 || unit5 == unit2 || unit5 == unit3 
+		|| unit5 == unit4)
+	{
+		unit5 = rand() % unitList.size();
+	}
+	while(enemy1 == enemy2 || enemy1 == enemy3 || enemy1 == enemy4
+		|| enemy1 == enemy5 || enemy1 == unit1 || enemy1 == unit2 || enemy1 == unit3 
+		|| enemy1 == unit4)
+	{
+		enemy1 = rand() % unitList.size();
+	}
+	while(enemy2 == enemy1 || enemy2 == enemy3 || enemy2 == enemy4
+		|| enemy2 == enemy5 || enemy2 == unit1 || enemy2 == unit2 || enemy2 == unit3 
+		|| enemy2 == unit4)
+	{
+		enemy2 = rand() % unitList.size();
+	}
+	while(enemy3 == enemy1 || enemy3 == enemy2 || enemy3 == enemy4
+		|| enemy3 == enemy5 || enemy3 == unit1 || enemy3 == unit2 || enemy3 == unit3 
+		|| enemy3 == unit4)
+	{
+		enemy3 = rand() % unitList.size();
+	}
+	while(enemy4 == enemy1 || enemy4 == enemy2 || enemy4 == enemy3 || enemy4 == enemy5 
+		|| enemy4 == unit1 || enemy4 == unit2 || enemy4 == unit3 
+		|| enemy4 == unit4)
+	{
+		enemy4 = rand() % unitList.size();
+	}
+	while(enemy5 == enemy1 || enemy5 == enemy2 || enemy5 == enemy3 || enemy5 == enemy4
+		|| enemy5 == unit1 || enemy5 == unit2 || enemy5 == unit3 
+		|| enemy5 == unit4)
+	{
+		enemy5 = rand() % unitList.size();
+	}
+
 	unitList[unit1].x = rand() % (map[0].size() / 3);
 	unitList[unit1].y = rand() % (map[0].size() / 3);
 	unitList[unit2].x = rand() % (map[0].size() / 3);
@@ -614,13 +730,64 @@ void gameSetup(vector<vector<mapPlace>>& map, vector<Unit>& unitList,
 	unitList[unit5].x = rand() % (map[0].size() / 3);
 	unitList[unit5].y = rand() % (map[0].size() / 3);
 
+	unitList[enemy1].x = rand() % (map[0].size());
+	unitList[enemy1].y = rand() % (map[0].size());
+	unitList[enemy2].x = rand() % (map[0].size());
+	unitList[enemy2].y = rand() % (map[0].size());
+	unitList[enemy3].x = rand() % (map[0].size());
+	unitList[enemy3].y = rand() % (map[0].size());
+	unitList[enemy4].x = rand() % (map[0].size());
+	unitList[enemy4].y = rand() % (map[0].size());
+	unitList[enemy5].x = rand() % (map[0].size());
+	unitList[enemy5].y = rand() % (map[0].size());
+
+	while((unitList[unit1].x == unitList[unit2].x && unitList[unit1].y == unitList[unit2].y)
+		|| (unitList[unit1].x == unitList[unit3].x && unitList[unit3].y == unitList[unit3].y)
+		|| (unitList[unit1].x == unitList[unit4].x && unitList[unit1].y == unitList[unit4].y)
+		|| (unitList[unit1].x == unitList[unit5].x && unitList[unit1].y == unitList[unit5].y))
+	{
+		unitList[unit1].x = rand() % (map[0].size() / 3);
+		unitList[unit1].y = rand() % (map[0].size() / 3);
+	}
+	while((unitList[unit2].x == unitList[unit3].x && unitList[unit2].y == unitList[unit3].y)
+		|| (unitList[unit2].x == unitList[unit4].x && unitList[unit2].y == unitList[unit4].y)
+		|| (unitList[unit2].x == unitList[unit5].x && unitList[unit2].y == unitList[unit5].y))
+	{
+		unitList[unit2].x = rand() % (map[0].size() / 3);
+		unitList[unit2].y = rand() % (map[0].size() / 3);
+	}
+	while((unitList[unit3].x == unitList[unit4].x && unitList[unit3].y == unitList[unit4].y)
+		|| (unitList[unit3].x == unitList[unit5].x && unitList[unit3].y == unitList[unit5].y))
+	{
+		unitList[unit3].x = rand() % (map[0].size() / 3);
+		unitList[unit3].y = rand() % (map[0].size() / 3);
+	}
+	while((unitList[unit4].x == unitList[unit5].x && unitList[unit4].y == unitList[unit5].y))
+	{
+		unitList[unit4].x = rand() % (map[0].size() / 3);
+		unitList[unit4].y = rand() % (map[0].size() / 3);
+	}
+
 	unitList[unit1].move(map, "none");
 	unitList[unit2].move(map, "none");
 	unitList[unit3].move(map, "none");
 	unitList[unit4].move(map, "none");
 	unitList[unit5].move(map, "none");
 
+	unitList[enemy1].enemy = true;
+	unitList[enemy1].move(map, "none");
+	unitList[enemy2].enemy = true;
+	unitList[enemy2].move(map, "none");
+	unitList[enemy3].enemy = true;
+	unitList[enemy3].move(map, "none");
+	unitList[enemy4].enemy = true;
+	unitList[enemy4].move(map, "none");
+	unitList[enemy5].enemy = true;
+	unitList[enemy5].move(map, "none");
+
 	system("clear");
+
+	activeUnitList.push_back("Your Active units: ");
 
 	activeUnitList.push_back(unitList[unit1].name);
 	activeUnitList.push_back(unitList[unit2].name);
@@ -628,13 +795,19 @@ void gameSetup(vector<vector<mapPlace>>& map, vector<Unit>& unitList,
 	activeUnitList.push_back(unitList[unit4].name);
 	activeUnitList.push_back(unitList[unit5].name);
 
+	activeUnitList.push_back("\nEnemies: ");
+
+	activeUnitList.push_back(unitList[enemy1].name);
+	activeUnitList.push_back(unitList[enemy2].name);
+	activeUnitList.push_back(unitList[enemy3].name);
+	activeUnitList.push_back(unitList[enemy4].name);
+	activeUnitList.push_back(unitList[enemy5].name);
+
 	displayMap(map, unitList);
 }
 
 void activeUnits(const vector<string>& activeUnitList)
 {
-	cout << endl << "Your active units: " << endl;
-
 	for(int i = 0; i < activeUnitList.size(); i++)
 	{
 		cout << activeUnitList[i] << endl;

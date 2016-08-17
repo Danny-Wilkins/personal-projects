@@ -40,7 +40,8 @@ def download(url, name):
 
 def extract(path):
 	if not os.path.exists(path):
-		zipfile.ZipFile(path + '.zip').extractall(path)
+		with ZipFile(path + '.zip', 'r') as zf:
+			zf.extractall(path)
 		print("Files extracted. Proceeding...")
 	
 def main():

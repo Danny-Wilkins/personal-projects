@@ -13,8 +13,6 @@ matplotlib
 
 cartopy
 
-urllib
-
 
 Credit for the included region datasets goes to: 
 

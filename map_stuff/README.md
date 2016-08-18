@@ -17,3 +17,7 @@ cartopy
 Credit for the included region datasets goes to: 
 
 https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes.
+
+Credit for country-boundingboxes.csv goes to:
+
+https://data.humdata.org/dataset/bounding-boxes-for-countries

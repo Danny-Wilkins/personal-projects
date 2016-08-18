@@ -5,9 +5,8 @@ import cartopy.io.shapereader as shpreader
 import csv, urllib, os, sys, zipfile
 
 
-def country_select():
+def country_select(country):
 
-	country = raw_input("Enter country: ")
 	full_file_name = ''
 
 	with open('reg_codes/slim-3/slim-3.csv', 'r') as region_codes:
@@ -33,42 +32,54 @@ def country_select():
 					extract(full_file_name[:-4])
 					print("Files extracted. Proceeding...")
 
+	if full_file_name == '':
+		print("Country not found. Exiting...")
+		sys.exit()
+
 	return full_file_name[:-4]
+
+def get_extent(country):
+
+	with open('lat_lon_data/country-boundingboxes.csv', 'r') as lat_lon_data:
+		csv_reader = csv.reader(lat_lon_data, delimiter=',')
+		for row in csv_reader:
+			if country.lower() in row[0].lower():
+				return [float(row[2])-1, float(row[4])+1, float(row[3])-1, float(row[5])+1]
+
+	return [-180, 180, -80, 80]
 
 def download(url, name):
 	urllib.urlretrieve(url, filename=name)
 
 def extract(path):
 	if not os.path.exists(path):
-		with ZipFile(path + '.zip', 'r') as zf:
+		with zipfile.ZipFile(path + '.zip', 'r') as zf:
 			zf.extractall(path)
 		print("Files extracted. Proceeding...")
 	
 def main():
-	path = country_select()
+	country = raw_input("Enter country: ")
+
+	path = country_select(country)
 
 	shp_file = path + '/' + path[4:-4] + '0.shp'
 
-	draw(shp_file)
+	draw(shp_file, get_extent(country))
 	
 
-def draw(fname):
+def draw(fname, extent):
 	print("Building...")
 
 	reader = shpreader.Reader(fname)
 
 	shapes = list(reader.geometries())
 
-	ax = plt.axes(projection=ccrs.PlateCarree())
+	ax = plt.axes(projection=ccrs.Mercator())
 
-	ax.add_geometries(shapes, ccrs.PlateCarree(), \
-					  edgecolor='black', facecolor='white', alpha=0.5)
+	ax.add_geometries(shapes, ccrs.Mercator(), \
+					  edgecolor='black', facecolor='white')
 
-	#ax.set_extent([-180, 50, 0, 80], ccrs.PlateCarree())
-
-	#plt.title('Countries')
-
-	#ax.coastlines()
+	ax.set_extent(extent, ccrs.Mercator())
 
 	print("Drawing...")
 
